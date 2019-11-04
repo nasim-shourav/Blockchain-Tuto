@@ -2,7 +2,7 @@ const hexToBinary = require ('hex-to-binary');
 const { GENESIS_DATA, MINE_RATE, THRESHOLD_BALANCE } = require('../config'); 
 const { cryptoHash } = require('../util');
 const Blockchain = require('./index');
-const walletAddress = require('../wallet/index');
+const { walletAddress } = require('../wallet');
 
 
 class Block {

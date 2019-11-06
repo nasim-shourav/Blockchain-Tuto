@@ -110,4 +110,6 @@ class Blockchain{
     }
 }
 
+//console.log(Blockchain.chain);
+
 module.exports = Blockchain;

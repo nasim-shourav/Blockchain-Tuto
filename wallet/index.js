@@ -60,7 +60,9 @@ class Wallet {
  
 };
  
-export const wallet = new Wallet();
-export const walletAddress = wallet.address;
+const wallet1 = new Wallet();
+exports.walletAddress = wallet1.address;
+
+//console.log(Wallet.calculateBalance({ chain: this.chain, address: this.address}));
  
 module.exports = Wallet;

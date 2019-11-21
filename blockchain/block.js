@@ -1,113 +1,46 @@
-const hexToBinary = require ('hex-to-binary');
-const { GENESIS_DATA, MINE_RATE, THRESHOLD_BALANCE } = require('../config'); 
+const hexToBinary = require('hex-to-binary');
+const { GENESIS_DATA, MINE_RATE } = require('../config');
 const { cryptoHash } = require('../util');
-const blockchain = require('./index');
-const { walletAddress } = require('../wallet');
-
-
-//let bal = walletAddress.calculateBalance({chain: Blockchain.chain, address: walletAddress});
-// const walletBalancecheck = walletAddress.calculateBalance({chain: Blockchain, address: walletAddress});
-
 
 class Block {
-    constructor({ timestamp, lastHash, hash, data, nonce, difficulty }){
-         this.timestamp = timestamp;
-         this.lastHash = lastHash;
-         this.hash = hash;
-         this.data = data;
-         this.nonce = nonce;
-         this.difficulty = difficulty;
-    }
+  constructor({ timestamp, lastHash, hash, data, nonce, difficulty }) {
+    this.timestamp = timestamp;
+    this.lastHash = lastHash;
+    this.hash = hash;
+    this.data = data;
+    this.nonce = nonce;
+    this.difficulty = difficulty;
+  }
 
-    static genesis(){
-        return new this(GENESIS_DATA);
-    }
+  static genesis() {
+    return new this(GENESIS_DATA);
+  }
 
-    static mineBlock({ lastBlock, data }){
-        const lastHash = lastBlock.hash;
-        let hash, timestamp;
-        let { difficulty } = lastBlock;   
-        let nonce = 0;
+  static mineBlock({ lastBlock, data }) {
+    const lastHash = lastBlock.hash;
+    let hash, timestamp;
+    let { difficulty } = lastBlock;
+    let nonce = 0;
 
-        do {
-            nonce++;
-            timestamp = Date.now();
-            difficulty = Block.adjustDifficulty({ originalBlock: lastBlock, timestamp });
-            hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty);
-        } while (hexToBinary(hash).substring(0,difficulty) !== '0'.repeat(difficulty));
+    do {
+      nonce++;
+      timestamp = Date.now();
+      difficulty = Block.adjustDifficulty({ originalBlock: lastBlock, timestamp });
+      hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty);
+    } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
-        return new this({ timestamp, lastHash, data, difficulty, nonce, hash });
-    }
-    
-    static adjustDifficulty({ originalBlock, timestamp }) {
-        const { difficulty } = originalBlock;
+    return new this({ timestamp, lastHash, data, difficulty, nonce, hash });
+  }
 
-        // const walletBalancecheck = walletAddress.calculateBalance({chain: blockchain.chain, address: walletAddress});
+  static adjustDifficulty({ originalBlock, timestamp }) {
+    const { difficulty } = originalBlock;
 
-        let walletBalancecheck = Block.balanceCheck;
+    if (difficulty < 1) return 1;
 
-        if (difficulty < 1 ) return 1;
+    if ((timestamp - originalBlock.timestamp) > MINE_RATE ) return difficulty - 1;
 
-        if ((timestamp - originalBlock.timestamp) > MINE_RATE ) {
-            
-            if (walletBalancecheck < THRESHOLD_BALANCE){
-                return difficulty + 1 ;
-            } else{ return difficulty -1 ; }
-        }
-
-        //if ((timestamp - originalBlock.timestamp) > MINE_RATE ) return difficulty -1 ;
-
-        return difficulty + 1;
-    }
-
-    static walletBalancecheck1 () {
-        const balanceCheck = walletAddress.calculateBalance({chain: blockchain.chain, address: walletAddress});
-        //console.log(balanceCheck);
-        return balanceCheck;
-    };
-
+    return difficulty + 1;
+  }
 }
-
-
-// const walletFoo = new Wallet(); 
-// const walletBar = new Wallet();
-
-// const generateWalletTransaction = ({ wallet, recipient, amount }) => {
-//     const transaction = wallet.createTransaction({
-//         recipient, amount, chain: blockchain.chain
-//     });
-
-//     transactionPool.setTransaction(transaction);
-// };
-
-// const walletAction = () => generateWalletTransaction({
-//     wallet, recipient: walletFoo.publicKey, amount:5
-// });
-
-// const walletFooAction = () => generateWalletTransaction({
-//     wallet: walletFoo, recipient: walletBar.publicKey, amount:10
-// });
-
-// const walletBarAction = () => generateWalletTransaction({
-//     wallet: walletBar, recipient: wallet.publicKey, amount:15
-// });
-
-// for (let i=0; i<10; i++) {
-//     if (i%3 === 0){
-//         walletAction();
-//         walletFooAction();
-//     } else if (i%3 === 1) {
-//         walletAction();
-//         walletBarAction();
-//     } else {
-//         walletFooAction();
-//         walletBarAction();
-//     }
-
-//     transactionMiner.mineTransactions();
-// }
-// const diff = adjustDifficulty();
-//console.log(bal);
-// console.log(Block.adjustDifficulty({originalBlock: Block, timestamp: this.timestamp }));
 
 module.exports = Block;

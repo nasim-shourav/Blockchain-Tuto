@@ -3,7 +3,7 @@ const redis = require('redis');
 
 const blockchain = require('../blockchain');
 const { MIN_BALANCE } = require('../config')
-const { walletAddress } = require('../wallet');
+const Wallet = require('../wallet');
 
 const CHANNELS = {
     TEST: 'TEST',
@@ -27,15 +27,10 @@ class PubSub{
         );
     }
 
-    static walletBalancecheck1 () {
-        const balanceCheck = walletAddress.calculateBalance({chain: blockchain.chain, address: walletAddress});
-        return balanceCheck;
-    };
-
-        
+       
     handleMessage(channel, message) {
-        
-        console.log(`Message received. Channel: ${channel}. Message: ${message}.`);
+        if (Wallet.WA > MIN_BALANCE){
+            console.log(`Message received. Channel: ${channel}. Message: ${message}.`);
     
             const parsedMessage = JSON.parse(message);
         
@@ -53,7 +48,7 @@ class PubSub{
                 default:
                     return;
             }
-        
+        }        
     }   
 
     subscribeToChannels(){

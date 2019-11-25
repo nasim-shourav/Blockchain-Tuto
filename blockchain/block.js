@@ -2,8 +2,8 @@ const hexToBinary = require ('hex-to-binary');
 const { GENESIS_DATA, MINE_RATE, THRESHOLD_BALANCE } = require('../config'); 
 const { cryptoHash } = require('../util');
 const blockchain = require('./index');
-const  { walletAddress } = require('../wallet');
-
+//const  { walletAddress } = require('../wallet');
+const  Wallet = require('../wallet');
 
 
 
@@ -38,33 +38,30 @@ class Block {
     }
 
    
-    static adjustDifficulty({ originalBlock, timestamp }) {
+    static adjustDifficulty({ originalBlock,timestamp }) {
         const { difficulty } = originalBlock;
-
-        // const walletBalancecheck = walletAddress.calculateBalance({chain: blockchain.chain, address: walletAddress});
-
-        const { walletBalancecheck } = walletAddress;
         
         if (difficulty < 1 ) return 1;
 
-        if ((timestamp - originalBlock.timestamp) > MINE_RATE ) return difficulty - 1;
+        if ((timestamp - originalBlock.timestamp) > MINE_RATE ) {
+            if ( Wallet.WA < THRESHOLD_BALANCE ){
+                return difficulty + 1 ;
+            } else { 
+                return difficulty -1 ; 
+            }    
+        } else {
+            difficulty + 1;
+        }
 
-        // if ((timestamp - originalBlock.timestamp) > MINE_RATE ) {
-            
-        //     if (walletBalancecheck < THRESHOLD_BALANCE){
-        //         return difficulty + 1 ;
-        //     } else{ return difficulty -1 ; }
-        // }
 
         
-
-        return difficulty + 1;
     }
 
 
 }
 
-console.log(walletAddress); // It shows undefined?
+//console.log(Wallet); // It shows undefined?
+//console.log(Wallet.WA);
 
 module.exports = Block;
 

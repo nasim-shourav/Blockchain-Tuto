@@ -65,7 +65,8 @@ class Wallet {
 };
  
 const walletAddress = Wallet.calculateBalance({chain: this, address: this});
-module.exports = { walletAddress }  ;
+module.exports = { WA: walletAddress,
+                    W: Wallet }  ;
 // wallet1.calculateBalance({chain:this.chain, address:this.address});
 
 
@@ -76,5 +77,3 @@ module.exports = { walletAddress }  ;
 
 
 //console.log(Wallet.calculateBalance({ chain: this.chain, address: this.address}));
- 
-module.exports =  Wallet ;

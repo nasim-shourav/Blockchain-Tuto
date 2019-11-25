@@ -83,8 +83,7 @@ describe('blockchain', () =>{
             describe('and the chain does not contain any invalid blocks', () => {
                 it('returns true', () =>{
                     expect(Blockchain.isValidChain(blockchain.chain)).toBe(true);
-                });
-                
+                });    
             });
         });
     });

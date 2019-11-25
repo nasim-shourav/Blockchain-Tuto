@@ -13,7 +13,7 @@ const { MIN_BALANCE } = require('./config') //Minimum balance to maintain, takin
 const app = express();
 const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
-const wallet = new Wallet();
+const wallet = new Wallet.W();
 const pubsub = new PubSub ({ blockchain, transactionPool });
 const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wallet, pubsub });
 
@@ -27,85 +27,86 @@ app.use(express.static(path.join(__dirname, 'client/dist')));
 
 //let p;
 
-
-
-let adrs = wallet.publicKey;
-let balnce = Wallet.calculateBalance({ chain: blockchain.chain, adrs })
+// let adrs = wallet.publicKey;
+// let balnce = Wallet.calculateBalance({ chain: blockchain.chain, adrs })
     // Comparing balance and min balance
-    if (MIN_BALANCE < balnce){
-        //console.log("The balance is =======> ",balnce)
-        app.get('/api/blocks', (req, res) => {
-            res.json(blockchain.chain);              
-        });
-        
-        app.post('/api/mine', (req, res) => {
-            const { data } = req.body;
-        
-            blockchain.addBlock({ data });
-        
-            pubsub.broadcastChain();
-        
-            res.redirect('/api/blocks');
-        });
-        
-        app.post('/api/transact', (req, res) => {
-            const { amount, recipient } = req.body;
-        
-            let transaction = transactionPool
-                .existingTransaction({ inputAddress: wallet.publicKey });
-        
-            try {
-                if (transaction) {
-                    transaction.update({ senderWallet: wallet, recipient, amount });
-                } else {
-                    transaction = wallet.createTransaction({
-                        recipient,
-                        amount,
-                        chain: blockchain.chain
-                    });
-                }
-            } catch(error) {
-                return res.status(400).json({type: 'error', message: error.message });
-            }
-        
-            transactionPool.setTransaction(transaction);
-        
-            pubsub.broadcastTransaction(transaction);
-        
-            res.json({ type: 'success', transaction });
-        });
-        
-        app.get('/api/transaction-pool-map', (req, res) => {
-            res.json(transactionPool.transactionMap);
-        });
-        
-        app.get('/api/mine-transactions', (req, res) => {
-            transactionMiner.mineTransactions();
-        
-            res.redirect('/api/blocks');
-        });
-        
-        app.get('/api/wallet-info', (req, res) => {
-            const address = wallet.publicKey;
-            
-            res.json({
-                address,
-                balance: Wallet.calculateBalance({ chain: blockchain.chain, address })
-            });    
-        });
-        
-        //__________This is to connect with the front-end
-        
-        app.get('*', (req, res) => {
-            res.sendFile(path.join(__dirname,'client/dist/index.html'));
-        });
-        
-        //__________This is to connect with the front-end
-    } else {
-        console.log("Wallet is out of minimum balance.")
-    }
 
-    //console.log("The balance is",balnce,"and the MIN_BALANCE is", MIN_BALANCE)    
+
+    // if (MIN_BALANCE < balnce){
+    //     //console.log("The balance is =======> ",balnce)
+        
+        
+    //     //__________This is to connect with the front-end
+    // } else {
+    //     console.log("Wallet is out of minimum balance.")
+    // }
+
+    app.get('/api/blocks', (req, res) => {
+        res.json(blockchain.chain);              
+    });
+    
+    app.post('/api/mine', (req, res) => {
+        const { data } = req.body;
+    
+        blockchain.addBlock({ data });
+    
+        pubsub.broadcastChain();
+    
+        res.redirect('/api/blocks');
+    });
+    
+    app.post('/api/transact', (req, res) => {
+        const { amount, recipient } = req.body;
+    
+        let transaction = transactionPool
+            .existingTransaction({ inputAddress: wallet.publicKey });
+    
+        try {
+            if (transaction) {
+                transaction.update({ senderWallet: wallet, recipient, amount });
+            } else {
+                transaction = wallet.createTransaction({
+                    recipient,
+                    amount,
+                    chain: blockchain.chain
+                });
+            }
+        } catch(error) {
+            return res.status(400).json({type: 'error', message: error.message });
+        }
+    
+        transactionPool.setTransaction(transaction);
+    
+        pubsub.broadcastTransaction(transaction);
+    
+        res.json({ type: 'success', transaction });
+    });
+    
+    app.get('/api/transaction-pool-map', (req, res) => {
+        res.json(transactionPool.transactionMap);
+    });
+    
+    app.get('/api/mine-transactions', (req, res) => {
+        transactionMiner.mineTransactions();
+    
+        res.redirect('/api/blocks');
+    });
+    
+    app.get('/api/wallet-info', (req, res) => {
+        const address = wallet.publicKey;
+        
+        res.json({
+            address,
+            balance: Wallet.W.calculateBalance({ chain: blockchain.chain, address })
+        });    
+    });
+    
+    //__________This is to connect with the front-end
+    
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname,'client/dist/index.html'));
+    });
+
     const syncWithRootState = () => {
         request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (error, response, body) => {
             if (!error && response.statusCode === 200) {

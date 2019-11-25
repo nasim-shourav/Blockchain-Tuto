@@ -1,5 +1,7 @@
 const MINE_RATE = 1000;
 const INITIAL_DIFFICULTY = 3;
+const THRESHOLD_BALANCE = 1080;
+const MIN_BALANCE = 800;
 
 const GENESIS_DATA = {
     timestamp: 1,
@@ -21,5 +23,7 @@ module.exports = {
     MINE_RATE,
     STARTING_BALANCE, 
     REWARD_INPUT, 
-    MINING_REWARD 
+    MINING_REWARD,
+    THRESHOLD_BALANCE,
+    MIN_BALANCE
 };

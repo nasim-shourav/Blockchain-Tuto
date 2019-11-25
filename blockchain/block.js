@@ -50,7 +50,7 @@ class Block {
                 return difficulty -1 ; 
             }    
         } else {
-            difficulty + 1;
+            return difficulty + 1;
         }
 
 

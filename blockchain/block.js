@@ -1,11 +1,11 @@
 const hexToBinary = require ('hex-to-binary');
 const { GENESIS_DATA, MINE_RATE, THRESHOLD_BALANCE } = require('../config'); 
 const { cryptoHash } = require('../util');
-const blockchain = require('./index');
-//const  { walletAddress } = require('../wallet');
 const  Wallet = require('../wallet');
+const Blockchain = require('./blockchain');
 
-
+const blockchain = new Blockchain();
+const wallet = new Wallet.W();
 
 class Block {
     constructor({ timestamp, lastHash, hash, data, nonce, difficulty }){
@@ -40,11 +40,19 @@ class Block {
    
     static adjustDifficulty({ originalBlock,timestamp }) {
         const { difficulty } = originalBlock;
+        const walletBalace = Wallet.W.calculateBalance({chain: blockchain.chain, address: wallet.publicKey});
         
-        if (difficulty < 1 ) return 1;
+        if (difficulty < 1) return 1;
 
+        //if ((timestamp - originalBlock.timestamp) > MINE_RATE ) return difficulty - 1;
+
+        //return difficulty + 1;
+        
+        
+        // if (difficulty < 1 ) return 1;
+    
         if ((timestamp - originalBlock.timestamp) > MINE_RATE ) {
-            if ( Wallet.WA < THRESHOLD_BALANCE ){
+            if ( walletBalace < THRESHOLD_BALANCE ){
                 return difficulty + 1 ;
             } else { 
                 return difficulty -1 ; 
@@ -52,17 +60,20 @@ class Block {
         } else {
             return difficulty + 1;
         }
-
-
+    
+    
         
     }
 
 
 }
 
-//console.log(Wallet); // It shows undefined?
-//console.log(Wallet.WA);
 
 module.exports = Block;
+
+
+
+
+
 
 

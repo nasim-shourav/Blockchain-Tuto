@@ -1,9 +1,13 @@
 const redis = require('redis');
 
 
-const blockchain = require('../blockchain');
+const Blockchain = require('../blockchain');
 const { MIN_BALANCE } = require('../config')
 const Wallet = require('../wallet');
+
+
+const bchain = new Blockchain();
+const wallet = new Wallet.W();
 
 const CHANNELS = {
     TEST: 'TEST',
@@ -11,6 +15,8 @@ const CHANNELS = {
     TRANSACTION: 'TRANSACTION'
 };
 
+
+console.log("From pubsub.js:", wallet.publicKey)
 class PubSub{
     constructor({ blockchain, transactionPool }) {
         this.blockchain = blockchain;
@@ -22,18 +28,22 @@ class PubSub{
         this.subscribeToChannels();
 
         this.subscriber.on(
-            'message', 
+            'message',
             (channel, message) => this.handleMessage(channel, message)
         );
     }
 
-       
+
     handleMessage(channel, message) {
-        if (Wallet.WA > MIN_BALANCE){
-            console.log(`Message received. Channel: ${channel}. Message: ${message}.`);
-    
+
+    // if ( bal > MIN_BALANCE){
+
+    //     }
+        const bal = Wallet.W.calculateBalance({ chain: bchain.chain, address: wallet.publicKey });
+        console.log(`Message received. Channel: ${channel}. Message: . and balance is ${bal}`);
+
             const parsedMessage = JSON.parse(message);
-        
+
             switch(channel) {
                 case CHANNELS.BLOCKCHAIN:
                     this.blockchain.replaceChain(parsedMessage, true, () => {
@@ -42,43 +52,43 @@ class PubSub{
                         });
                     });
                     break;
-                case CHANNELS.TRANSACTION: 
+                case CHANNELS.TRANSACTION:
                     this.transactionPool.setTransaction(parsedMessage);
                     break;
                 default:
                     return;
             }
-        }        
-    }   
+
+    }
 
     subscribeToChannels(){
-        
-        
+
+
         Object.values(CHANNELS).forEach(channel => {
             this.subscriber.subscribe(channel);
         });
     }
 
     publish({ channel, message }) {
-        
-        
+
+
         this.subscriber.unsubscribe(channel, () => {
             this.publisher.publish(channel, message, () => {
                 this.subscriber.subscribe(channel);
             });
-        });  
+        });
     }
 
     broadcastChain() {
-        
+
         this.publish({
             channel: CHANNELS.BLOCKCHAIN,
-            message: JSON.stringify(this.blockchain.chain)        
-        });   
+            message: JSON.stringify(this.blockchain.chain)
+        });
     }
 
     broadcastTransaction(transaction){
-        
+
         this.publish({
             channel: CHANNELS.TRANSACTION,
             message: JSON.stringify(transaction)
@@ -91,4 +101,3 @@ class PubSub{
 // setTimeout(() => testPubSub.publisher.publish(CHANNELS.TEST, 'fooooooooo'), 1000);
 
 module.exports = PubSub;
-
